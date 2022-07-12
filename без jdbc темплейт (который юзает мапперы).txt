@@ -1,0 +1,108 @@
+package org.mvcapp.dao;
+
+import org.mvcapp.models.Person;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import javax.xml.transform.Result;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class PeopleDAO {
+    private static int COUNT;
+
+    // should be in the properties file
+    private final static String URL = "jdbc:postgresql://localhost:5432/DB";
+    private final static String username = "admin";
+    private final static String password = "postgres";
+
+    private static Connection connection;
+
+    static {
+        try {
+            Class.forName("org.postgresql.Driver"); // устаревшая хрень
+            connection = DriverManager.getConnection(URL, username, password);
+        } catch (SQLException | ClassNotFoundException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    public static List<Person> showAll() {
+        List<Person> people = new ArrayList<>();
+        try {
+            Statement statement = connection.createStatement();
+            String SQL = "SELECT * FROM Person";
+            ResultSet result = statement.executeQuery("SQl");
+
+            while (result.next()) {
+                Person person = new Person();
+                person.setId(result.getInt("id"));
+                person.setName(result.getString("name"));
+                people.add(person);
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return people;
+    }
+
+    public void addNew (Person person) {
+        try {
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement("INSERT INTO Person VALUES (?,?)"); // id, name
+            preparedStatement.setInt(1, person.getId()); // id is AUTO-incremented
+            preparedStatement.setString(2, person.getName());
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    public Person show(int id){
+        Person person = null;
+        try {
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement("SELECT * FROM Person WHERE id = ?" );
+            preparedStatement.setInt(1, id);
+            ResultSet  resultSet = preparedStatement.executeQuery();
+
+            person = new Person();
+            person.setName(resultSet.getString("name"));
+            person.setId(id); // from parameter
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return person;
+    }
+
+    public void update (int id, Person person){  // to update data in the particular person
+        try {
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement("UPDATE Person SET name=? WHERE id = ?" );
+            preparedStatement.setInt(1, person.getId()); // id is AUTO-incremented
+            preparedStatement.setString(2, person.getName());
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    public void delete(int id){ //delete a person for its id
+        try {
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement("DELETE FROM Person WHERE id = ?" );
+            preparedStatement.setInt(1, id); 
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+}
