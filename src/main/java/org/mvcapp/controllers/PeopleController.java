@@ -1,29 +1,29 @@
 package org.mvcapp.controllers;
 
 import jakarta.validation.Valid;
-import jdk.internal.icu.text.NormalizerBase;
 import org.mvcapp.dao.PeopleDAO;
 import org.mvcapp.models.Person;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @Controller
 @RequestMapping("/people")
 public class PeopleController {
-    private final PeopleDAO dao;
+    private final PeopleDAO personDAO;
 
-    public PeopleController(PeopleDAO dao) {
-        this.dao = dao;
+    @Autowired
+    public PeopleController(PeopleDAO personDAO) {
+        this.personDAO = personDAO;
     }
 
     @GetMapping()
-    public static String showAll(Model model) {
-        model.getAttribute("people", dao.showAll());
-        return "people/all";
+    public String showAll(Model model) {
+        model.addAttribute("people", personDAO.showAll());
+        return "people/index";
     }
 
     @GetMapping("/{id}")
@@ -41,13 +41,13 @@ public class PeopleController {
         if (bindingResult.hasErrors()) {
             return "people/new";
         }
-        dao.save(person);
+        personDAO.save(person);
         return "redirect:/people";
     }
 
     @GetMapping("/{id}/edit")
     public String edit(@PathVariable("id") int id, Model model) {
-        model.getAttribute("person", dao.showPerson());
+        model.addAttribute("person", personDAO.showPerson(id));
         return "people/edit";
     }
 
@@ -57,13 +57,13 @@ public class PeopleController {
         if (bindingResult.hasErrors()) {
             return "people/edit";
         }
-        dao.update(id, person);
+        personDAO.update(id, person);
         return "redirect:/people";
     }
 
     @DeleteMapping("/{id}/delete")
     public String delete(@PathVariable("id") int id) {
-        dao.delete(id);
+        personDAO.delete(id);
         return "redirect:/people";
     }
 
