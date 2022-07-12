@@ -22,7 +22,7 @@ public class PeopleDAO {
 
     static {
         try {
-            Class.forName("org.postgresql.Driver"); // устаревшая хрень
+            Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(URL, username, password);
         } catch (SQLException | ClassNotFoundException throwables) {
             throwables.printStackTrace();

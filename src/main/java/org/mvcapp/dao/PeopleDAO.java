@@ -1,45 +1,31 @@
 package org.mvcapp.dao;
 
 import org.mvcapp.models.Person;
+import org.postgresql.jdbc.PgConnection;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import java.sql.*;
 import java.util.List;
 
 public class PeopleDAO {
     private static int COUNT;
+//
+//    private final JdbcTemplate JdbcTemplate;
+//    Connection connection;
+//
+//    @Autowired
+//    public PeopleDAO(JdbcTemplate jdbcTemplate) {
+//        JdbcTemplate = jdbcTemplate;
+//    }
 
-    private final JdbcTemplate JdbcTemplate;
-
-    @Autowired
-    public PeopleDAO(JdbcTemplate jdbcTemplate) {
-        JdbcTemplate = jdbcTemplate;
+    public void showAll() {
+        return jdbcTemplate.query("SELECT * FROM People", PersonMapper personMapper)
     }
 
-    public static List<Person> showAll() {
-        return jdbcTemplate.query("SELECT * FROM Person", PersonMapper personMapper){
-//        List<Person> people = new ArrayList<>();
-//        try {
-//            Statement statement = connection.createStatement();
-//            String SQL = "SELECT * FROM Person";
-//            ResultSet result = statement.executeQuery("SQl");
-//
-//            while (result.next()) {
-//                Person person = new Person();
-//                person.setId(result.getInt("id"));
-//                person.setName(result.getString("name"));
-//                people.add(person);
-//            }
-//
-//        } catch (SQLException throwables) {
-//            throwables.printStackTrace();
-//        }
-//        return people;
-    }
-
-    public void addNew (Person person) {
+    public void save(Person person) {
         try {
             PreparedStatement preparedStatement =
-                    connection.prepareStatement("INSERT INTO Person VALUES (?,?)"); // id, name
+                    connection.prepareStatement("INSERT INTO People VALUES (?,?)"); // id, name
             preparedStatement.setInt(1, person.getId()); // id is AUTO-incremented
             preparedStatement.setString(2, person.getName());
             preparedStatement.executeUpdate();
@@ -49,17 +35,18 @@ public class PeopleDAO {
         }
     }
 
-    public Person show(int id){
-        Person person = null;
+    public Person showPerson(int id) {
+        Person person = null; // we can use Optional here!
         try {
             PreparedStatement preparedStatement =
-                    connection.prepareStatement("SELECT * FROM Person WHERE id = ?" );
+                    connection.prepareStatement("SELECT * FROM People WHERE id = ?");
             preparedStatement.setInt(1, id);
-            ResultSet  resultSet = preparedStatement.executeQuery();
-
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next(); // we can have a few users with the same ID here - ITS BAD!
             person = new Person();
             person.setName(resultSet.getString("name"));
             person.setId(id); // from parameter
+            person.setEmail(resultSet.getString("email"));
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -67,12 +54,13 @@ public class PeopleDAO {
         return person;
     }
 
-    public void update (int id, Person person){  // to update data in the particular person
+    public void update(int id, Person person) {
         try {
             PreparedStatement preparedStatement =
-                    connection.prepareStatement("UPDATE Person SET name=? WHERE id = ?" );
-            preparedStatement.setInt(1, person.getId()); // id is AUTO-incremented
-            preparedStatement.setString(2, person.getName());
+                    connection.prepareStatement("UPDATE People SET name=? , email= ? WHERE id = ?");
+            preparedStatement.setInt(3, person.getId()); // id is AUTO-incremented
+            preparedStatement.setString(1, person.getName());
+            preparedStatement.setString(2, person.getEmail());
             preparedStatement.executeUpdate();
 
         } catch (SQLException throwables) {
@@ -80,10 +68,10 @@ public class PeopleDAO {
         }
     }
 
-    public void delete(int id){ //delete a person for its id
+    public void delete(int id) { //delete a person for its id
         try {
             PreparedStatement preparedStatement =
-                    connection.prepareStatement("DELETE FROM Person WHERE id = ?" );
+                    connection.prepareStatement("DELETE FROM People WHERE id = ?");
             preparedStatement.setInt(1, id);
             preparedStatement.executeUpdate();
 
@@ -92,4 +80,3 @@ public class PeopleDAO {
         }
     }
 
-}
