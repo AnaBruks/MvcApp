@@ -3,8 +3,8 @@ package org.mvcapp.controllers;
 import jakarta.validation.Valid;
 import org.mvcapp.dao.PeopleDAO;
 import org.mvcapp.models.Person;
+import org.mvcapp.util.PeopleValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.converter.json.GsonBuilderUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/people")
 public class PeopleController {
     private final PeopleDAO personDAO;
+    private final PeopleValidator pplValidator;
 
     @Autowired
-    public PeopleController(PeopleDAO personDAO) {
+    public PeopleController(PeopleDAO personDAO, PeopleValidator pplValidator) {
         this.personDAO = personDAO;
+        this.pplValidator = pplValidator;
     }
 
     @GetMapping()
@@ -39,6 +41,7 @@ public class PeopleController {
 
     @PostMapping()
     public String create(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult) {
+        pplValidator.validate(person, bindingResult);
         if (bindingResult.hasErrors()) {
             return "people/new";
         }
@@ -55,6 +58,7 @@ public class PeopleController {
     @PatchMapping("/{id}/update")
     public String update(@PathVariable("id") int id,
                          @ModelAttribute("person") @Valid Person person, BindingResult bindingResult) {
+        pplValidator.validate(person, bindingResult);
         if (bindingResult.hasErrors()) {
             return "people/edit";
         }

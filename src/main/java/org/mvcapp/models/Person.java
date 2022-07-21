@@ -1,10 +1,6 @@
 package org.mvcapp.models;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
-import org.mvcapp.dao.PeopleDAO;
+import jakarta.validation.constraints.*;
 
 public class Person {
     private int id;
@@ -15,14 +11,29 @@ public class Person {
     @NotEmpty(message = "Email should be not empty!")
     @Email(message = "Please enter correct email")
     private String email;
+    private String address;
 
-    public Person(int id, String name, String email) {
+    public Person(int id, String name, String email, String address) {
         this.id = id;
         this.name = name;
         this.email = email;
+        this.address = address;
     }
 
-    public Person() {
+    @Pattern(regexp = "[A-Z][a-z]{2,20}," +
+            "\\s[1-9]{5}," +
+            "\\s[A-Z][a-z]{2,20}," +
+            "\\s[1-9]{1,4}",
+            message = "Please enter your address in this format: City, index, Street, house number")
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Person(int i, String s, String s1) {
     }
 
     public String getEmail() {
